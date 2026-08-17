@@ -1,0 +1,253 @@
+﻿//student.c —— 动态数组容器的实现
+
+//引入自定义头文件
+#include "student.h"
+
+//引入标准库头文件
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+//定义宏
+#define INITIAL_CAPACITY 8	//初始容量
+#define COL_ID 16			//学号列宽
+#define COL_NAME 24			//姓名列宽
+#define COL_AGE 8			//年龄列宽
+#define SEPARATOR_WIDTH 53	//分隔线宽度
+
+//函数声明
+void list_init(StudentList* list);
+void list_free(StudentList* list);
+static int list_grow(StudentList* list);
+Student* list_find_by_id(const StudentList* list, const char* id);
+int list_add(StudentList* list, const Student* stu);
+int list_remove_by_id(StudentList* list, const char* id);
+static int compare_socre_desc(const void* a, const void* b);
+static int compare_socre_asc(const void* a, const void* b);
+void list_sort_by_score(StudentList* list, int descending);
+static int display_width(const char* s);
+static void print_padded(const char* s, int width);
+static void student_print_header(void);
+void student_print(const Student* stu);
+void list_print(const StudentList* list);
+
+//函数：初始化容器
+void list_init(StudentList* list) {
+	//检测list是否为NULL，不假设调用方永远正确
+	if (list == NULL) {		
+		return;
+	}
+	list->data = NULL;		
+	list->size = 0;
+	list->capacity = 0;
+}
+ 
+//函数：释放容器内存
+void list_free(StudentList* list) {
+	//检测list是否为NULL，不假设调用方永远正确
+	if (list == NULL) {		
+		return;
+	}
+	free(list->data);	//释放后立即复位指针，防止悬空指针	
+	list->data = NULL;
+	list->size = 0;
+	list->capacity = 0;
+}
+
+//函数：容器扩容
+//返回值：返回0代表成功，-1代表失败
+static int list_grow(StudentList* list) {
+	size_t new_capacity;
+	Student* new_data;
+	if (list->size < list->capacity) {
+		return 0;	//不需要扩容
+	}
+	new_capacity = (list->capacity == 0) ? INITIAL_CAPACITY : list->capacity * 2;
+	//先用临时变量存储realloc返回的指针，避免直接赋值给list->data，防止扩容失败导致原数据丢失
+	new_data = realloc(list->data, new_capacity * sizeof(Student));
+	if (new_data == NULL) {
+		return -1;	//扩容失败
+	}
+	list->data = new_data;
+	list->capacity = new_capacity;
+	return 0;		//扩容成功
+}
+
+//函数：根据学号查找
+//返回值：找到返回记录地址，找不到返回“NULL”
+//注意：返回的指针在下一次增删导致realloc后可能失效，不可长期保存
+Student* list_find_by_id(const StudentList* list, const char* id) {
+	if (list == NULL || id == NULL) {
+		return NULL;	//参数错误
+	}
+	size_t i;
+	for (i = 0; i < list->size; i++){
+		if (strcmp(list->data[i].id, id) == 0){
+			return &list->data[i];	//找到，返回记录地址
+		}
+	}
+	return NULL;	//找不到			
+}
+
+//函数：添加学生 
+//返回值：返回0代表成功，-1代表业务失败，-2代表系统失败
+int list_add(StudentList* list, const Student* stu) {
+	if (list == NULL || stu == NULL) {
+		return -2;	//系统失败，参数错误
+	}
+	if (list_find_by_id(list, stu->id) != NULL) {
+		return -1;	//业务失败，学号已存在
+	}
+	if (list_grow(list) == -1) {
+		return -2;	//系统失败，内存分配失败
+	}
+	list->data[list->size] = *stu;
+	list->size++;
+	return 0;	//成功
+}
+
+//函数：删除学生
+//返回值：返回0代表未找到指定学号的学生，1代表删除成功
+int list_remove_by_id(StudentList* list, const char* id) {
+	if (list == NULL || id == NULL) {
+		return 0;	//参数错误
+	}
+	for (size_t i = 0; i < list->size; i++) {
+		if (strcmp(list->data[i].id, id) == 0) {
+			if (i + 1 < list->size) {
+				//使用memmove函数把被删元素之后的所有元素整体前移一格
+				memmove(&list->data[i],
+						&list->data[i + 1],
+						(list->size - i - 1) * sizeof(Student)
+					);
+			}
+			list->size--;
+			return 1;	//删除成功
+		}
+	}
+	return 0;	//未找到指定学号的学生
+}
+
+//函数：按成绩降序排序的比较函数（传入qsort）
+/*
+qsort比较函数的返回值规则为：
+返回负数：	a排在b前
+返回零：	a与b相等
+返回正数：	a排在b后
+*/
+static int compare_socre_desc(const void* a, const void* b) {
+	//void可以指向任何类型，但正因为它不知道指向什么类型，
+	//所以不能解引用、不能访问成员、不能做指针算术,所以要做强制类型转换
+	const Student* sa = (const Student*)a;
+	const Student* sb = (const Student*)b;
+	//浮点数在内存里是近似存储的，直接相减再取符号，遇到极小差值时符号可能出错，
+	//而“<”和“>”是浮点数的原生比较，没有减法，没有精度损失，所以采用三分支写法
+	if (sa->score < sb->score) return 1;
+	if (sa->score > sb->score) return -1;
+	return 0;
+}
+
+//函数：按成绩升序排序的比较函数（传入qsort）
+static int compare_socre_asc(const void* a, const void* b) {
+	return compare_socre_desc(b, a);	//升序排序就是降序排序的相反
+}
+
+//函数：按成绩排序
+//参数descending为1表示降序，为0表示升序
+void list_sort_by_score(StudentList* list, int descending) {
+	if (list == NULL || list->size < 2) {
+		return;	//参数错误或无需排序
+	}
+	if (descending) {
+		qsort(list->data, list->size, sizeof(Student), compare_socre_desc);
+	} else {
+		qsort(list->data, list->size, sizeof(Student), compare_socre_asc);
+	}
+}
+
+//关于中文显示宽度：
+/*
+打印表格最自然的写法是printf("%-16s%-24s", id, name)，这在纯英文下工作良好，但一
+旦姓名是中文就会错位，问题的根源在于中文显示宽度和字节数的差异：printf的%-24s按
+字节数补齐，它数字符串占多少字节，不足24就补空格，而UTF-8编码下一个汉字占3个字
+节，在控制台上却只显示2个字符宽度
+解决办法是放弃%-Ns的自动填充，自己计算宽度并补空格，具体计算方法如下：
+ASCII字符（<0x80）			占 1 列
+UTF-8首字节（非10xx xxxx）	视为全角字符，占 2 列
+UTF-8后续字节（10xx xxxx）	不占列（它属于前一个字符）
+*/
+//函数：计算字符串在终端显示的列宽
+//返回值：字符串在终端显示的列宽
+static int display_width(const char* s) {
+	int width = 0;
+	while (*s != '\0') {
+		//以无符号方式安全地读取当前字节存入 c，同时将指针推进到下一个字节
+		//（任何涉及字节值比较、位运算的场景，都必须用unsigned char，否则高位为1的字节会被当作负数）
+		unsigned char c = (unsigned char)*s++;
+		if (c < 0x80) {
+			width += 1;	//ASCII字符占1列
+		}
+		//通过取余把c的低6位全部清零，只提取最高2位，用于判断是UTF-8首字节还是后续字节
+		else if ((c & 0xC0) != 0x80) {
+			width += 2;	//UTF-8首字节占2列
+		} 
+		//UTF-8后续字节不占列
+	}
+	return width;
+}
+
+//函数：打印指定字符串并补齐空格
+static void print_padded(const char* s, int width) {
+	if (s == NULL || width <= 0) {
+		return;
+	}
+	int padding = width - display_width(s);
+	printf("%s", s);
+	for (int i = 0; i < padding; i++) {
+		putchar(' ');
+	}
+}
+
+//函数：打印学生列表表头
+static void student_print_header(void){
+	print_padded("学号", COL_ID);
+	print_padded("姓名", COL_NAME);
+	print_padded("年龄", COL_AGE);
+	printf("成绩\n");
+}
+
+//函数：打印单个学生信息
+void student_print(const Student* stu) {
+	if (stu == NULL) {
+		return;
+	}
+	//age是int类型，要先转换为字符串
+	char age_str[32];
+	snprintf(age_str, sizeof(age_str), "%d", stu->age);
+	print_padded(stu->id, COL_ID);	
+	print_padded(stu->name, COL_NAME);
+	print_padded(age_str, COL_AGE);
+	printf("%.1f\n", stu->score);
+}
+
+//函数：打印学生列表
+void list_print(const StudentList* list) {
+	if (list == NULL || list->size == 0) {
+		printf("暂无学生记录\n");
+		return;
+	}
+	//打印表头和分隔线
+	student_print_header();
+	for (int i = 0; i < SEPARATOR_WIDTH; i++) {
+		putchar('-');
+	}
+	putchar('\n');
+	//打印每个学生信息
+	for (int i = 0; i < list->size; i++) {
+		student_print(&list->data[i]);
+	}
+}
+
+
+
+
