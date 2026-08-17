@@ -20,6 +20,7 @@
 static char* trim(char* s);
 static char* read_line(const char* prompt, char* buf, size_t size);
 static int read_int(const char* prompt, int min, int max, int* out);
+static int read_double(const char* prompt, double min, double max, double* out);
 
 //函数：去除字符串首尾的空白字符
 //返回值：去除首尾空白字符后的字符串
@@ -75,16 +76,60 @@ static char* read_line(const char* prompt, char* buf, size_t size) {
 }
 
 //函数：安全输入整数
-//
+//返回值：1表示成功获取合法整数（会将解析后的整数写入out）；0表示遇到EOF（如windows用户按下Ctrl+Z）
 static int read_int(const char* prompt, int min, int max, int* out){
 	char buf[INPUT_BUF_LEN];
 	char* line;
-
-
+	char* end;
+	long value;
+	//无限循环直到读到合法输入或遇到EOF
 	for (;;) {
-		if ((*line = read_line) == NULL) {
-			return 0;
+		line = read_line(prompt, buf, INPUT_BUF_LEN);
+		if (line == NULL) {
+			return 0;	//读取失败
 		}
-		
+		//strtol转换前必须将errno清零
+		errno = 0;
+		//将输入值转化为十进制（&end为二级指针，strtol通过这个二级指针修改原始的end）
+		value = strtol(line, &end, 10);	
+		//四重检验
+		if (errno == 0 &&	//检验未发生溢出
+			end != line &&	//检验至少成功解析了一个字符（排除纯空白输入）
+			*end == '\0' &&	//检验数字后没有垃圾字符（排除类似“123abc”的输入）
+			value >= min && value <= max){	//检验数值范围
+			*out = (int)value;
+			return 1;	//读取成功
+		}
+		printf("输入无效，请输入%d-%d之间的整数。\n", min, max);
 	}
 }
+
+//函数：安全输入浮点数
+//返回值：1表示成功获取合法浮点数（会将解析后的浮点数写入out）；0表示遇到EOF（如windows用户按下Ctrl+Z）
+static int read_double(const char* prompt, double min, double max, double* out) {
+	char buf[INPUT_BUF_LEN];
+	char* line;
+	char* end;
+	double value;
+	//无限循环直到读到合法输入或遇到EOF
+	for (;;) {
+		line = read_line(prompt, buf, INPUT_BUF_LEN);
+		if (line == NULL) {
+			return 0;	//读取失败
+		}
+		//strtod转换前必须将errno清零
+		errno = 0;
+		//将输入值转化为double类型（&end为二级指针，strtod通过这个二级指针修改原始的end）
+		value = strtod(line, &end);
+		//四重检验
+		if (errno == 0 &&	//检验未发生溢出
+			end != line &&	//检验至少成功解析了一个字符
+			*end == '\0' &&	//检验数字后没有垃圾字符
+			value >= min && value <= max) {	//检验数值范围
+			*out = value;
+			return 1;	//读取成功
+		}
+		printf("输入无效，请输入%.0f-%.0f之间的数字。\n", min, max);
+	}
+}
+

@@ -46,6 +46,18 @@ int main()
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(65001);
 
+	//测试5（测试三种输入）
+	/*char name[128];
+	char* trimmed_name;
+	int age;
+	double score;
+	if (trimmed_name = read_line("请输入姓名：", name, 128))
+		printf("姓名：%s\n", trimmed_name);
+	if (read_int("请输入年龄（1-150）：", 1, 150, &age))
+		printf("年龄：%d\n", age);
+	if (read_double("请输入成绩（0-100）：", 0.0, 100.0, &score))
+		printf("成绩：%.1f\n", score);*/
+
 	//测试4（测试学生列表打印）
 	/*StudentList list;
 	list_init(&list);
@@ -83,7 +95,7 @@ int main()
 	printf("查找李四：%s\n", list_find_by_id(&list, "2023002") == NULL ? "未找到" : "找到");
 	printf("查找王五：%s\n", list_find_by_id(&list, "2023003") == NULL ? "未找到" : "找到");*/
 
-	//测试2（测试初始化、扩容）(需把list_grow函数设为全局可见)
+	//测试2（测试初始化、扩容）
 	/*StudentList list;
 	Student stu = { "2023001", "张三", 18, 90.0 };
 	list_init(&list);
