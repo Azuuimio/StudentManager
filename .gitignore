@@ -21,3 +21,4 @@ StudentManager.vcxproj.user
 StudentManager.vcxproj.filters
 StudentManager.vcxproj
 .gitattributes
+x64/Debug/StudentManager.tlog/unsuccessfulbuild
