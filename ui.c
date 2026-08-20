@@ -14,7 +14,7 @@
 
 //定义宏
 #define DATA_FILE "students.dat"	//数据文件名
-#define INPUT_BUF_LEN 128			//输入缓冲区长度
+#define INPUT_BUF_LEN 64			//输入缓冲区长度
 
 //函数声明
 static char* trim(char* s);
@@ -27,6 +27,8 @@ static void ui_add(Student* list, int* dirty);
 static void ui_remove(StudentList* list, int* dirty);
 static void ui_modify(StudentList* list, int* dirty);
 static void ui_find_by_id(StudentList* list);
+static void ui_find_by_name(StudentList* list);
+void ui_run(void);
 
 //函数：去除字符串首尾的空白字符
 //返回值：去除首尾空白字符后的字符串
@@ -263,7 +265,7 @@ static void ui_modify(StudentList* list, int* dirty) {
 	printf("1.姓名  2.年龄\n");
 	printf("3.成绩  0.取消\n");
 	if (!read_int("请选择：", 0, 3, &choice) || choice == 0) {
-		return:
+		return;
 	}
 	switch (choice) {
 		case 1:
@@ -294,15 +296,77 @@ static void ui_find_by_id(StudentList* list){
 	printf("—— 按学号查询 ——\n");
 	line = read_line("请输入学号：", buf, sizeof(buf));
 	if (line == NULL) return;
+	if (line[0] == '\0') {
+		printf("学号不能为空。\n");
+		return;
+	}
 	stu = list_find_by_id(list, line);
 	if (stu != NULL) {
-		sstudent_print_separator();
+		student_print_separator();
 		student_print_header();
 		student_print(stu);
 		student_print_separator();
 	} else {
-		printf("未找到该学生。\n")
+		printf("未找到该学生。\n");
 	}
 }
 
-//
+//函数：交互式按姓名查询
+static void ui_find_by_name(StudentList* list) {
+	char buf[INPUT_BUF_LEN];
+	char* line;
+	int found = 0;
+	unsigned long long num = 0;
+	printf("—— 按姓名查询 ——\n");
+	line = read_line("请输入姓名(支持模糊匹配)：", buf, sizeof(buf));
+	if (line == NULL) return;
+	if (line[0] == '\0') {
+		printf("姓名不能为空。\n");
+		return;
+	}
+	for (size_t i = 0; i < list->size; i++) {
+		if (strstr(list->data[i].name, line) != NULL) {
+			if (found != 1) {
+				student_print_separator();
+				student_print_header();
+			}
+			student_print(&list->data[i]);
+			num++;
+			found = 1;
+		}
+	}
+	if (found == 1) {
+		student_print_separator();
+		printf("共 %llu 位匹配的学生。\n", num);
+	} else {
+		printf("未找到匹配的学生。\n");
+	}
+}
+
+//函数：排序显示
+static void 
+
+
+
+void ui_run(void) {
+	
+	//测试6（交互式增删查改）
+	/*StudentList list;
+	int dirty = 0;
+	list_init(&list);
+	Student s[3] = {
+		{"1", "张三", 20, 90.5},
+		{"2", "李四", 21, 85.0},
+		{"3", "王五", 19, 92.0}
+	};
+	list_add(&list, &s[0]);
+	list_add(&list, &s[1]);
+	list_add(&list, &s[2]);
+	while (1) {
+		ui_find_by_id(&list);
+		ui_find_by_name(&list);
+		ui_add(&list, &dirty);
+		ui_remove(&list, &dirty);
+		ui_modify(&list, &dirty);
+	}*/
+}

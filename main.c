@@ -47,7 +47,9 @@ int main()
 	SetConsoleOutputCP(65001);
 	SetConsoleCP(65001);
 
-	//测试5（测试三种输入）
+	ui_run();
+
+	//测试5（三种输入）
 	/*char name[128];
 	char* trimmed_name;
 	int age;
@@ -59,8 +61,8 @@ int main()
 	if (read_double("请输入成绩（0-100）：", 0.0, 100.0, &score))
 		printf("成绩：%.1f\n", score);*/
 
-	//测试4（测试学生列表打印）
-	StudentList list;
+	//测试4（学生列表打印）
+	/*StudentList list;
 	list_init(&list);
 	Student s[3] = {
 		{"2023001", "张三", 20, 90.5},
@@ -70,9 +72,9 @@ int main()
 	list_add(&list, &s[0]);
 	list_add(&list, &s[1]);
 	list_add(&list, &s[2]);
-	list_print(&list);
+	list_print(&list);*/
 
-	//测试3（测试添加、查找、删除学生）
+	//测试3（添加、查找、删除学生）
 	/*StudentList list;
 	list_init(&list);
 	Student s[3] = {
@@ -96,7 +98,7 @@ int main()
 	printf("查找李四：%s\n", list_find_by_id(&list, "2023002") == NULL ? "未找到" : "找到");
 	printf("查找王五：%s\n", list_find_by_id(&list, "2023003") == NULL ? "未找到" : "找到");*/
 
-	//测试2（测试初始化、扩容）
+	//测试2（初始化、扩容）
 	/*StudentList list;
 	Student stu = { "2023001", "张三", 18, 90.0 };
 	list_init(&list);
@@ -118,7 +120,7 @@ int main()
 		stu.id[7] = '0' + i;
 	}*/
 
-	//测试1（测试学生结构体和封装）
+	//测试1（学生结构体和封装）
 	/*printf("你好，学生信息管理系统！\n");
 	Student s[3] = {
 		{"2023001", "张三", 20, 90.5},

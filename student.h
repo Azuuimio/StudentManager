@@ -8,8 +8,8 @@
 #include <stddef.h>
 
 //定义宏
-#define STUDENTS_ID_LEN	16		//学号长度
-#define STUDENTS_NAME_LEN 32	//姓名长度
+#define STUDENTS_ID_LEN	10		//学号长度
+#define STUDENTS_NAME_LEN 15	//姓名长度
 
 //定义学生结构体
 typedef struct {

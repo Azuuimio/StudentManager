@@ -11,10 +11,10 @@
 //定义宏
 #define INITIAL_CAPACITY 8	//初始容量
 /*-----------------------------------*/
-#define COL_ID 16			//学号列宽
-#define COL_NAME 24			//姓名列宽
-#define COL_AGE 8			//年龄列宽
-#define SEPARATOR_WIDTH 53	//分隔线宽
+#define COL_ID 12			//学号列宽
+#define COL_NAME 12			//姓名列宽
+#define COL_AGE 12			//年龄列宽
+#define SEPARATOR_WIDTH 41	//分隔线宽
 /*-----------------------------------*/
 
 //函数声明
@@ -247,14 +247,13 @@ void list_print(const StudentList* list) {
 		printf("暂无学生记录\n");
 		return;
 	}
-	//打印表头和分隔线
-	student_print_header();
 	student_print_separator();
-
-	//打印每个学生信息
+	student_print_header();
 	for (int i = 0; i < list->size; i++) {
 		student_print(&list->data[i]);
 	}
+	student_print_separator();
+	printf("共 %llu 条记录\n", (unsigned long long)list->size);
 }
 
 
