@@ -27,6 +27,8 @@ int list_remove_by_id(StudentList* list, const char* id);
 static int compare_socre_desc(const void* a, const void* b);
 static int compare_socre_asc(const void* a, const void* b);
 void list_sort_by_score(StudentList* list, int descending);
+static int compare_id_asc(const void* a, const void* b);
+void list_sort_by_id(StudentList* list);
 static int display_width(const char* s);
 static void print_padded(const char* s, int width);
 void student_print_header(void);
@@ -132,12 +134,6 @@ int list_remove_by_id(StudentList* list, const char* id) {
 }
 
 //函数：按成绩降序排序的比较函数（传入qsort）
-/*
-qsort比较函数的返回值规则为：
-返回负数：	a排在b前
-返回零：	a与b相等
-返回正数：	a排在b后
-*/
 static int compare_socre_desc(const void* a, const void* b) {
 	//void可以指向任何类型，但正因为它不知道指向什么类型，所以不能解引用、不能访
 	//问成员、不能做指针算术,所以要做强制类型转换
@@ -149,6 +145,12 @@ static int compare_socre_desc(const void* a, const void* b) {
 	if (sa->score > sb->score) return -1;
 	return 0;
 }
+//关于qsort比较函数的返回值规则：
+/*
+返回负数：	a排在b前
+返回零：	a与b相等
+返回正数：	a排在b后
+*/
 
 //函数：按成绩升序排序的比较函数（传入qsort）
 static int compare_socre_asc(const void* a, const void* b) {
@@ -166,6 +168,22 @@ void list_sort_by_score(StudentList* list, int descending) {
 	} else {
 		qsort(list->data, list->size, sizeof(Student), compare_socre_asc);
 	}
+}
+
+//函数：按学号排序的比较函数（传入qsort）
+static int compare_id_asc(const void* a, const void* b) {
+	const Student* sa = (const Student*)a;
+	const Student* sb = (const Student*)b;
+	//strcmp的返回值语义与qsort比较函数完全一致，直接返回即可
+	return strcmp(sa->id, sb->id);
+}
+
+//函数：按学号升序排序
+void list_sort_by_id(StudentList* list) {
+	if (list == NULL || list->size < 2) {
+		return;	//参数错误或无需排序
+	}
+	qsort(list->data, list->size, sizeof(Student), compare_id_asc);
 }
 
 //关于中文显示宽度：

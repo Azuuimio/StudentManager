@@ -186,7 +186,7 @@ static void clear_screen(void) {
 }
 
 //函数：交互式添加学生
-static void ui_add(Student* list, int* dirty) {
+static void ui_add(StudentList* list, int* dirty) {
 	char buf[INPUT_BUF_LEN];
 	char* line;
 	Student stu;
@@ -196,8 +196,15 @@ static void ui_add(Student* list, int* dirty) {
 	for (;;) {
 		line = read_line("学号：", buf, sizeof(buf));
 		if (line == NULL) return;
-		if (line[0] != '\0') break;
-		printf("学号不能为空，请重新输入。\n");
+		if (line[0] == '\0') {
+			printf("添加失败：学号不能为空。\n");
+			return;
+		}
+		if (list_find_by_id(list, line) != NULL) {
+			printf("添加失败：学号 %s 已存在。\n", line);
+			return;
+		}
+		break;
 	}
 	copy_str(stu.id, sizeof(stu.id), line);
 	//输入姓名
@@ -217,8 +224,6 @@ static void ui_add(Student* list, int* dirty) {
 	if (ret == 0) {
 		printf("添加成功。\n");
 		*dirty = 1;	//脏标记
-	} else if (ret == -1) {
-		printf("添加失败：学号 %s 已存在。\n", stu.id);
 	} else {
 		printf("添加失败：内存不足。\n");
 		}
@@ -255,15 +260,14 @@ static void ui_modify(StudentList* list, int* dirty) {
 		printf("未找到该学生。\n");
 		return;
 	}
-	printf("当前信息：");
+	printf("当前信息：\n");
 	student_print_separator();
 	student_print_header();
 	student_print(stu);
 	student_print_separator();
 	//修改信息
 	printf("需要修改哪一项？\n");
-	printf("1.姓名  2.年龄\n");
-	printf("3.成绩  0.取消\n");
+	printf("1.姓名  2.年龄  3.成绩  0.取消\n");
 	if (!read_int("请选择：", 0, 3, &choice) || choice == 0) {
 		return;
 	}
@@ -344,13 +348,30 @@ static void ui_find_by_name(StudentList* list) {
 }
 
 //函数：排序显示
-static void 
+static void ui_sort_show(StudentList* list) {
+	int choice;
+	printf("—— 按成绩排序显示 ——\n");
+	printf("排序方式：\n");
+	printf("1.成绩从高到低\n");
+	printf("2.成绩从低到高\n");
+	printf("3.按学号排序\n");
+	printf("0.取消\n");
+	if (!read_int("请选择：", 0, 3, &choice) || choice == 0) {
+		return;
+	}
+	if (choice == 3) {
+		list_sort_by_id(list);
+	} else {
+		list_sort_by_score(list, choice == 1);
+	}
+	list_print(list);
+}
 
 
 
 void ui_run(void) {
 	
-	//测试6（交互式增删查改）
+	//测试6（交互式增删查改与排序显示）
 	/*StudentList list;
 	int dirty = 0;
 	list_init(&list);
@@ -368,5 +389,6 @@ void ui_run(void) {
 		ui_add(&list, &dirty);
 		ui_remove(&list, &dirty);
 		ui_modify(&list, &dirty);
+		ui_sort_show(&list);
 	}*/
 }
