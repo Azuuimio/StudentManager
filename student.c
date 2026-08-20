@@ -10,10 +10,12 @@
 
 //定义宏
 #define INITIAL_CAPACITY 8	//初始容量
+/*-----------------------------------*/
 #define COL_ID 16			//学号列宽
 #define COL_NAME 24			//姓名列宽
 #define COL_AGE 8			//年龄列宽
-#define SEPARATOR_WIDTH 53	//分隔线宽度
+#define SEPARATOR_WIDTH 53	//分隔线宽
+/*-----------------------------------*/
 
 //函数声明
 void list_init(StudentList* list);
@@ -27,7 +29,8 @@ static int compare_socre_asc(const void* a, const void* b);
 void list_sort_by_score(StudentList* list, int descending);
 static int display_width(const char* s);
 static void print_padded(const char* s, int width);
-static void student_print_header(void);
+void student_print_header(void);
+void student_print_separator(void);
 void student_print(const Student* stu);
 void list_print(const StudentList* list);
 
@@ -63,7 +66,7 @@ static int list_grow(StudentList* list) {
 		return 0;	//不需要扩容
 	}
 	new_capacity = (list->capacity == 0) ? INITIAL_CAPACITY : list->capacity * 2;
-	//先用临时变量存储realloc返回的指针，避免直接赋值给list->data，防止扩容失败导致原数据丢失
+	//若直接赋值给list->data，扩容失败可能导致原数据丢失，所以先用临时变量存储realloc返回的指针
 	new_data = realloc(list->data, new_capacity * sizeof(Student));
 	if (new_data == NULL) {
 		return -1;	//扩容失败
@@ -90,16 +93,16 @@ Student* list_find_by_id(const StudentList* list, const char* id) {
 }
 
 //函数：添加学生 
-//返回值：返回0代表成功，-1代表业务失败，-2代表系统失败
+//返回值：返回0代表成功，-1代表学号已存在，-2代表内存不足
 int list_add(StudentList* list, const Student* stu) {
 	if (list == NULL || stu == NULL) {
-		return -2;	//系统失败，参数错误
+		return -2;	//参数错误
 	}
 	if (list_find_by_id(list, stu->id) != NULL) {
-		return -1;	//业务失败，学号已存在
+		return -1;	//学号已存在
 	}
 	if (list_grow(list) == -1) {
-		return -2;	//系统失败，内存分配失败
+		return -2;	//内存分配失败
 	}
 	list->data[list->size] = *stu;
 	list->size++;
@@ -136,8 +139,8 @@ qsort比较函数的返回值规则为：
 返回正数：	a排在b后
 */
 static int compare_socre_desc(const void* a, const void* b) {
-	//void可以指向任何类型，但正因为它不知道指向什么类型，
-	//所以不能解引用、不能访问成员、不能做指针算术,所以要做强制类型转换
+	//void可以指向任何类型，但正因为它不知道指向什么类型，所以不能解引用、不能访
+	//问成员、不能做指针算术,所以要做强制类型转换
 	const Student* sa = (const Student*)a;
 	const Student* sb = (const Student*)b;
 	//浮点数在内存里是近似存储的，直接相减再取符号，遇到极小差值时符号可能出错，
@@ -209,11 +212,19 @@ static void print_padded(const char* s, int width) {
 }
 
 //函数：打印学生列表表头
-static void student_print_header(void){
+void student_print_header(void){
 	print_padded("学号", COL_ID);
 	print_padded("姓名", COL_NAME);
 	print_padded("年龄", COL_AGE);
 	printf("成绩\n");
+}
+
+//函数：打印学生列表分隔线
+void student_print_separator(void) {
+	for (int i = 0; i < SEPARATOR_WIDTH; i++) {
+		putchar('-');
+	}
+	putchar('\n');
 }
 
 //函数：打印单个学生信息
@@ -238,10 +249,8 @@ void list_print(const StudentList* list) {
 	}
 	//打印表头和分隔线
 	student_print_header();
-	for (int i = 0; i < SEPARATOR_WIDTH; i++) {
-		putchar('-');
-	}
-	putchar('\n');
+	student_print_separator();
+
 	//打印每个学生信息
 	for (int i = 0; i < list->size; i++) {
 		student_print(&list->data[i]);

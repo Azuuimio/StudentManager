@@ -19,8 +19,14 @@
 //函数声明
 static char* trim(char* s);
 static char* read_line(const char* prompt, char* buf, size_t size);
-static int read_int(const char* prompt, int min, int max, int* out);
+static read_int(const char* prompt, int min, int max, int* out);
 static int read_double(const char* prompt, double min, double max, double* out);
+static void copy_str(char* dst, size_t dst_size, const char* src);
+static void clear_screen(void);
+static void ui_add(Student* list, int* dirty);
+static void ui_remove(StudentList* list, int* dirty);
+static void ui_modify(StudentList* list, int* dirty);
+static void ui_find_by_id(StudentList* list);
 
 //函数：去除字符串首尾的空白字符
 //返回值：去除首尾空白字符后的字符串
@@ -49,7 +55,7 @@ static char *trim (char* s){
 */
 
 //函数：安全输入字符串
-//返回值：去除首尾空白字符后的字符串，输入失败返回NULL
+//返回值：去除首尾空白字符后的字符串，遇到EOF返回NULL
 static char* read_line(const char* prompt, char* buf, size_t size) {
 	//确保size不会超过int的最大值，防止fgets函数参数溢出
 	size_t safe_size = (size > INT_MAX) ? INT_MAX : size;
@@ -58,7 +64,7 @@ static char* read_line(const char* prompt, char* buf, size_t size) {
 		fflush(stdout);	//手动冲刷，确保提示信息立即输出
 	}
 	if (fgets(buf, (int)safe_size, stdin) == NULL){
-		return NULL;	//输入失败，返回NULL
+		return NULL;	//遇到EOF返回NULL
 	}
 	//下方if语句用于处理输入超出缓冲区大小的情况
 	//strchr函数用于查找字符串中是否包含换行符，如果不包含则说明输入超出缓冲区大小
@@ -75,8 +81,8 @@ static char* read_line(const char* prompt, char* buf, size_t size) {
 	return trim(buf);	
 }
 
-//函数：安全输入整数
-//返回值：1表示成功获取合法整数（会将解析后的整数写入out）；0表示遇到EOF（如windows用户按下Ctrl+Z）
+//函数：安全输入[min,max]范围内整数（非法输入时重试）
+//返回值：1表示成功获取合法整数（会将解析后的整数写入out）；0表示遇到EOF
 static int read_int(const char* prompt, int min, int max, int* out){
 	char buf[INPUT_BUF_LEN];
 	char* line;
@@ -104,8 +110,8 @@ static int read_int(const char* prompt, int min, int max, int* out){
 	}
 }
 
-//函数：安全输入浮点数
-//返回值：1表示成功获取合法浮点数（会将解析后的浮点数写入out）；0表示遇到EOF（如windows用户按下Ctrl+Z）
+//函数：安全输入[min,max]范围内浮点数（非法输入时重试）
+//返回值：1表示成功获取合法浮点数（会将解析后的浮点数写入out）；0表示遇到EOF
 static int read_double(const char* prompt, double min, double max, double* out) {
 	char buf[INPUT_BUF_LEN];
 	char* line;
@@ -133,3 +139,170 @@ static int read_double(const char* prompt, double min, double max, double* out) 
 	}
 }
 
+//函数：安全拷贝字符串
+static void copy_str(char* dst, size_t dst_size, const char* src) {
+	snprintf(dst, dst_size, "%s", src);
+}
+//关于此函数存在的意义：
+/*
+此函数把snprintf的安全拷贝封装成语义清晰的工具，确保无论上游是否经过readline的
+校验、数据来源是用户输入还是文件加载、代码如何重构或变更，写入操作始终受到保护
+*/
+//关于snprintf和strcpy：
+/*
+strcpy(dst, src)只有两个参数，编译器无法检查dst是否能容纳src，它仅以源字符串的
+"\0"作为停止条件，即使超过目标缓冲区容量，也会无条件向后续内存写入，造成缓冲区
+溢出，所以使用snprintf替代
+*/
+
+//函数：清空屏幕（通过 win32 API 实现）
+static void clear_screen(void) {
+	HANDLE						hOut;		//控制台输出句柄
+	CONSOLE_SCREEN_BUFFER_INFO	info;		//控制台屏幕缓冲区信息结构体，包含缓冲区尺寸、可见窗口范围、当前颜色属性等
+	COORD						origin;		//填充操作的起始坐标
+	DWORD						cells;		//要操作的单元格总数
+	DWORD						written;	//实际写入的单元格数量（API要求必须传这个参数）
+	//获取控制台输出句柄
+	//关于标准输入输出：
+	/*
+	标准输入输出是操作系统为每个进程预分配的三个固定数据通
+	道，GetStdHandle(STD_OUTPUT_HANDLE)获取的其实是标准输出
+	的句柄，本程序中它指向控制台
+	*/
+	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	//检测是否为真正的控制台环境
+	if (!GetConsoleScreenBufferInfo(hOut, &info)) {
+		return;
+	}
+	origin.X = 0;
+	origin.Y = 0;
+	cells = (DWORD)info.dwSize.X * (DWORD)info.dwSize.Y;
+	//用空格字符填满缓冲区
+	FillConsoleOutputCharacterW(hOut, L' ', cells, origin, &written);
+	//将光标移回缓冲区原点
+	SetConsoleCursorPosition(hOut, origin);
+}
+
+//函数：交互式添加学生
+static void ui_add(Student* list, int* dirty) {
+	char buf[INPUT_BUF_LEN];
+	char* line;
+	Student stu;
+	int ret;
+	printf("—— 添加学生 ——\n");
+	//输入学号
+	for (;;) {
+		line = read_line("学号：", buf, sizeof(buf));
+		if (line == NULL) return;
+		if (line[0] != '\0') break;
+		printf("学号不能为空，请重新输入。\n");
+	}
+	copy_str(stu.id, sizeof(stu.id), line);
+	//输入姓名
+	for (;;) {
+		line = read_line("姓名：", buf, sizeof(buf));
+		if (line == NULL) return;
+		if (line[0] != '\0') break;
+		printf("姓名不能为空，请重新输入。\n");
+	}
+	copy_str(stu.name, sizeof(stu.name), line);
+	//输入年龄
+	if (!read_int("年龄：", 1, 150, &stu.age)) return;
+	//输入成绩
+	if (!read_double("成绩：", 0.0, 100.0, &stu.score)) return;
+	//加入学生列表
+	ret = list_add(list, &stu);
+	if (ret == 0) {
+		printf("添加成功。\n");
+		*dirty = 1;	//脏标记
+	} else if (ret == -1) {
+		printf("添加失败：学号 %s 已存在。\n", stu.id);
+	} else {
+		printf("添加失败：内存不足。\n");
+		}
+
+}
+
+//函数：交互式删除学生
+static void ui_remove(StudentList* list, int* dirty) {
+	char buf[INPUT_BUF_LEN];
+	char* line;
+	printf("—— 删除学生 ——\n");
+	line = read_line("请输入要删除的学号：", buf, sizeof(buf));
+	if (line == NULL) return;
+	if (list_remove_by_id(list, line)) {
+		printf("删除成功。\n");
+		*dirty = 1;	//脏标记
+	} else {
+		printf("未找到学号为 %s 的学生。\n", line);
+	}
+}
+
+//函数：交互式修改学生信息
+static void ui_modify(StudentList* list, int* dirty) {
+	char buf[INPUT_BUF_LEN];
+	char* line;
+	Student* stu;
+	int choice;
+	printf("—— 修改学生信息 ——\n");
+	//查找学生
+	line = read_line("请输入要修改的学号：", buf, sizeof(buf));
+	if (line == NULL) return;
+	stu = list_find_by_id(list, line);
+	if (stu == NULL) {
+		printf("未找到该学生。\n");
+		return;
+	}
+	printf("当前信息：");
+	student_print_separator();
+	student_print_header();
+	student_print(stu);
+	student_print_separator();
+	//修改信息
+	printf("需要修改哪一项？\n");
+	printf("1.姓名  2.年龄\n");
+	printf("3.成绩  0.取消\n");
+	if (!read_int("请选择：", 0, 3, &choice) || choice == 0) {
+		return:
+	}
+	switch (choice) {
+		case 1:
+			for (;;) {
+				line = read_line("新姓名：", buf, sizeof(buf));
+				if (line == NULL) return;
+				if (line[0] != '\0') break;
+				printf("姓名不能为空，请重新输入。\n");
+			}
+			copy_str(stu->name, sizeof(stu->name), line);
+			break;
+		case 2:
+			if (!read_int("新年龄：", 1, 150, &stu->age)) return;
+			break;
+		case 3:
+			if (!read_int("新成绩：", 0.0, 100.0, &stu->score)) return;
+			break;
+	}
+	printf("修改成功。\n");
+	*dirty = 1;	//脏标记
+}
+
+//函数：交互式按学号查询
+static void ui_find_by_id(StudentList* list){
+	char buf[INPUT_BUF_LEN];
+	char* line;
+	Student* stu;
+	printf("—— 按学号查询 ——\n");
+	line = read_line("请输入学号：", buf, sizeof(buf));
+	if (line == NULL) return;
+	stu = list_find_by_id(list, line);
+	if (stu != NULL) {
+		sstudent_print_separator();
+		student_print_header();
+		student_print(stu);
+		student_print_separator();
+	} else {
+		printf("未找到该学生。\n")
+	}
+}
+
+//
