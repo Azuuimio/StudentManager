@@ -28,6 +28,9 @@ static void ui_remove(StudentList* list, int* dirty);
 static void ui_modify(StudentList* list, int* dirty);
 static void ui_find_by_id(StudentList* list);
 static void ui_find_by_name(StudentList* list);
+static void ui_sort_show(StudentList* list);
+static void press_enter_to_continue(void);
+static void print_menu(void);
 void ui_run(void);
 
 //函数：去除字符串首尾的空白字符
@@ -367,10 +370,58 @@ static void ui_sort_show(StudentList* list) {
 	list_print(list);
 }
 
+//函数：打印主菜单
+static void print_menu(void) {
+	printf("========== 学生信息管理系统 ==========\n");
+	printf("  1. 添加学生\n");
+	printf("  2. 删除学生\n");
+	printf("  3. 修改学生信息\n");
+	printf("  4. 按学号查询\n");
+	printf("  5. 按姓名查询\n");
+	printf("  6. 显示全部学生\n");
+	printf("  7. 排序显示\n");
+	printf("  8. 保存到文件\n");
+	printf("  9. 从文件加载\n");
+	printf("  0. 退出\n");
+	printf("======================================\n");
+}
 
+//函数：按回车继续
+static void press_enter_to_continue(void) {
+	char buf[INPUT_BUF_LEN];
+	read_line("按回车键继续……", buf, sizeof(buf));
+}
 
+//函数：交互界面主入口
 void ui_run(void) {
-	
+	StudentList list;
+	int dirty;
+	int choice;
+	list_init(&list);
+	//主循环
+	for (;;) {
+		clear_screen();
+		print_menu();
+		if (!read_int("请选择功能：", 0, 9, &choice)) {
+			break;
+		}
+		switch (choice) {
+			case 1: ui_add(&list, &dirty);          break;
+			case 2: ui_remove(&list, &dirty);       break;
+			case 3: ui_modify(&list, &dirty);       break;
+			case 4: ui_find_by_id(&list);           break;
+			case 5: ui_find_by_name(&list);         break;
+			case 6: list_print(&list);              break;
+			case 7: ui_sort_show(&list);            break;
+			case 8:break;
+			case 9:break;
+			case 0:break;
+		}
+		press_enter_to_continue();
+	}
+
+
+
 	//测试6（交互式增删查改与排序显示）
 	/*StudentList list;
 	int dirty = 0;
