@@ -4,7 +4,7 @@
 
 ## 运行示例
 
-![屏幕截图](.\运行示例\屏幕截图.png)
+<img width="1738" height="933" alt="屏幕截图" src="https://github.com/user-attachments/assets/1cdedb45-1ea5-49e3-8a80-64eaae20b524" />
 
 ## 常见问题（重要）：C4996 报错
 
