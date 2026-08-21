@@ -34,7 +34,6 @@ static void ui_save(StudentList* list, int* dirty);
 static void ui_load(StudentList* list, int* dirty);
 static void press_enter_to_continue(void);
 static void print_menu(void);
-void ui_run(void);
 
 //函数：去除字符串首尾的空白字符
 //返回值：去除首尾空白字符后的字符串
@@ -227,24 +226,29 @@ static void ui_add(StudentList* list, int* dirty) {
 		*dirty = 1;	//脏标记
 	} else if (ret == -1){
 		printf("添加失败：学号 %s 已存在。\n", stu.id);
-	} else {
+	} else if (ret == -2) {
 		printf("添加失败：内存不足。\n");
-		}
-
+	} else {
+		printf("添加失败：参数错误。\n");
+	}
 }
 
 //函数：交互式删除学生
 static void ui_remove(StudentList* list, int* dirty) {
 	char buf[INPUT_BUF_LEN];
 	char* line;
+	int ret;
 	printf("—— 删除学生 ——\n");
 	line = read_line("请输入要删除的学号：", buf, sizeof(buf));
 	if (line == NULL) return;
-	if (list_remove_by_id(list, line)) {
+	ret = list_remove_by_id(list, line);
+	if (ret == 0) {
 		printf("删除成功。\n");
 		*dirty = 1;	//脏标记
-	} else {
+	} else if (ret == -1){
 		printf("未找到学号为 %s 的学生。\n", line);
+	} else {
+		printf("删除失败：参数错误。\n");
 	}
 }
 

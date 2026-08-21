@@ -21,10 +21,6 @@ typedef struct {
 	uint32_t count;		//记录数
 }FileHeader;
 
-//函数声明
-int storage_save(const char* filename, const StudentList* list);
-int storage_load(const char* filename, StudentList* list);
-
 //函数：将容器中的全部记录保存到文件
 //返回值：0代表成功，-1代表参数非法，-2代表文件无法打开或写入
 int storage_save(const char* filename, const StudentList* list) {

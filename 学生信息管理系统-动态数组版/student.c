@@ -18,23 +18,12 @@
 /*-----------------------------------*/
 
 //函数声明
-void list_init(StudentList* list);
-void list_free(StudentList* list);
 static int list_grow(StudentList* list);
-Student* list_find_by_id(const StudentList* list, const char* id);
-int list_add(StudentList* list, const Student* stu);
-int list_remove_by_id(StudentList* list, const char* id);
 static int compare_score_desc(const void* a, const void* b);
 static int compare_score_asc(const void* a, const void* b);
-void list_sort_by_score(StudentList* list, int descending);
 static int compare_id_asc(const void* a, const void* b);
-void list_sort_by_id(StudentList* list);
 static int display_width(const char* s);
 static void print_padded(const char* s, int width);
-void student_print_header(void);
-void student_print_separator(void);
-void student_print(const Student* stu);
-void list_print(const StudentList* list);
 
 //函数：初始化容器
 void list_init(StudentList* list) {
@@ -95,10 +84,10 @@ Student* list_find_by_id(const StudentList* list, const char* id) {
 }
 
 //函数：添加学生 
-//返回值：返回0代表成功，-1代表学号已存在，-2代表内存不足
+//返回值：返回0代表成功，-1代表学号已存在，-2代表内存不足，1代表参数错误
 int list_add(StudentList* list, const Student* stu) {
 	if (list == NULL || stu == NULL) {
-		return -2;	//参数错误
+		return 1;	//参数错误
 	}
 	if (list_find_by_id(list, stu->id) != NULL) {
 		return -1;	//学号已存在
@@ -112,10 +101,10 @@ int list_add(StudentList* list, const Student* stu) {
 }
 
 //函数：删除学生
-//返回值：返回0代表未找到指定学号的学生，1代表删除成功
+//返回值：返回0代表删除成功，-1代表未找到指定学号的学生，1代表参数错误
 int list_remove_by_id(StudentList* list, const char* id) {
 	if (list == NULL || id == NULL) {
-		return 0;	//参数错误
+		return 1;	//参数错误
 	}
 	for (size_t i = 0; i < list->size; i++) {
 		if (strcmp(list->data[i].id, id) == 0) {
@@ -127,10 +116,10 @@ int list_remove_by_id(StudentList* list, const char* id) {
 					);
 			}
 			list->size--;
-			return 1;	//删除成功
+			return 0;	//删除成功
 		}
 	}
-	return 0;	//未找到指定学号的学生
+	return -1;	//未找到指定学号的学生
 }
 
 //函数：按成绩降序排序的比较函数（传入qsort）

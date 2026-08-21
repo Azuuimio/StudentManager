@@ -33,10 +33,10 @@ void list_init(StudentList* list);
 void list_free(StudentList* list);	
 /*------------------------------*/
 //函数：添加学生 
-//返回值：返回0代表成功，-1代表学号已存在，-2代表内存不足
+//返回值：返回0代表成功，-1代表学号已存在，-2代表内存不足，1代表参数错误
 int list_add (StudentList* list, const Student* stu);	
 //函数：删除学生
-//返回值：返回0代表未找到指定学号的学生，1代表删除成功
+//返回值：返回0代表删除成功， -1代表未找到指定学号的学生，1代表参数错误
 int list_remove_by_id(StudentList* list, const char* id);
 //函数：根据学号查找
 //返回值：找到返回记录地址，找不到返回“NULL”
