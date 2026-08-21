@@ -225,6 +225,8 @@ static void ui_add(StudentList* list, int* dirty) {
 	if (ret == 0) {
 		printf("添加成功。\n");
 		*dirty = 1;	//脏标记
+	} else if (ret == -1){
+		printf("添加失败：学号 %s 已存在。\n", stu.id);
 	} else {
 		printf("添加失败：内存不足。\n");
 		}
@@ -397,7 +399,7 @@ static void ui_load(StudentList* list, int* dirty) {
 
 //函数：打印主菜单
 static void print_menu(void) {
-	printf("========== 学生信息管理系统 ==========\n");
+	printf("=========== 学生信息管理系统 ===========\n");
 	printf("  1. 添加学生\n");
 	printf("  2. 删除学生\n");
 	printf("  3. 修改学生信息\n");
@@ -408,7 +410,7 @@ static void print_menu(void) {
 	printf("  8. 保存到文件\n");
 	printf("  9. 从文件加载\n");
 	printf("  0. 退出\n");
-	printf("======================================\n");
+	printf("========================================\n");
 }
 
 //函数：按回车继续
@@ -463,25 +465,4 @@ void ui_run(void) {
 		}
 		press_enter_to_continue();
 	}
-
-	//测试6（交互式增删查改与排序显示）
-	/*StudentList list;
-	int dirty = 0;
-	list_init(&list);
-	Student s[3] = {
-		{"1", "张三", 20, 90.5},
-		{"2", "李四", 21, 85.0},
-		{"3", "王五", 19, 92.0}
-	};
-	list_add(&list, &s[0]);
-	list_add(&list, &s[1]);
-	list_add(&list, &s[2]);
-	while (1) {
-		ui_find_by_id(&list);
-		ui_find_by_name(&list);
-		ui_add(&list, &dirty);
-		ui_remove(&list, &dirty);
-		ui_modify(&list, &dirty);
-		ui_sort_show(&list);
-	}*/
 }

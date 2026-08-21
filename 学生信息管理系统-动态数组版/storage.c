@@ -42,6 +42,7 @@ int storage_save(const char* filename, const StudentList* list) {
 	header.count = (uint32_t)list->size;
 	//写入文件头
 	if (fwrite(&header, sizeof(header), 1, fp) != 1) {
+		fclose(fp);
 		return -2;
 	}
 	//写入学生数据
