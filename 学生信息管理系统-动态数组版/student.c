@@ -1,4 +1,4 @@
-﻿//student.c —— 动态数组容器的实现
+﻿//student.c —— 学生数据模型与动态数组容器
 
 //引入自定义头文件
 #include "student.h"

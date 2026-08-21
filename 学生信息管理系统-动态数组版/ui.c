@@ -3,6 +3,7 @@
 //引入自定义头文件
 #include "ui.h"
 #include "student.h"
+#include "storage.h"
 
 //引入标准库头文件
 #include <stdio.h>
@@ -29,6 +30,8 @@ static void ui_modify(StudentList* list, int* dirty);
 static void ui_find_by_id(StudentList* list);
 static void ui_find_by_name(StudentList* list);
 static void ui_sort_show(StudentList* list);
+static void ui_save(StudentList* list, int dirty);
+static void ui_load(StudentList* list, int* dirty);
 static void press_enter_to_continue(void);
 static void print_menu(void);
 void ui_run(void);
@@ -148,11 +151,6 @@ static int read_double(const char* prompt, double min, double max, double* out) 
 static void copy_str(char* dst, size_t dst_size, const char* src) {
 	snprintf(dst, dst_size, "%s", src);
 }
-//关于此函数存在的意义：
-/*
-此函数把snprintf的安全拷贝封装成语义清晰的工具，确保无论上游是否经过readline的
-校验、数据来源是用户输入还是文件加载、代码如何重构或变更，写入操作始终受到保护
-*/
 //关于snprintf和strcpy：
 /*
 strcpy(dst, src)只有两个参数，编译器无法检查dst是否能容纳src，它仅以源字符串的
@@ -370,6 +368,33 @@ static void ui_sort_show(StudentList* list) {
 	list_print(list);
 }
 
+//函数：交互式写入文件
+static void ui_save(StudentList* list, int* dirty) {
+	int ret = storage_save(DATA_FILE, list);
+	if (ret == 0) {
+		printf("已保存 %llu 条记录到 %s\n", (unsigned long long)list->size, DATA_FILE);
+		*dirty = 0;
+	} else {
+		printf("保存失败：无法写入文件 %s，错误码 %d\n", DATA_FILE, ret);
+	}
+}
+
+//函数：交互式读取文件
+static void ui_load(StudentList* list, int* dirty) {
+	int ret = storage_load(DATA_FILE, list);
+	if (ret == 0) {
+		printf("已从 %s 加载 %llu 条记录\n",
+			DATA_FILE, (unsigned long long)list->size);
+		*dirty = 0;
+	}
+	else if (ret == -3) {
+		printf("加载失败：%s 不是有效的数据文件(格式不符)。\n", DATA_FILE);
+	}
+	else {
+		printf("加载失败：无法读取文件 %s。\n", DATA_FILE);
+	}
+}
+
 //函数：打印主菜单
 static void print_menu(void) {
 	printf("========== 学生信息管理系统 ==========\n");
@@ -395,7 +420,7 @@ static void press_enter_to_continue(void) {
 //函数：交互界面主入口
 void ui_run(void) {
 	StudentList list;
-	int dirty;
+	int dirty = 0;
 	int choice;
 	list_init(&list);
 	//主循环
@@ -413,14 +438,22 @@ void ui_run(void) {
 			case 5: ui_find_by_name(&list);         break;
 			case 6: list_print(&list);              break;
 			case 7: ui_sort_show(&list);            break;
-			case 8:break;
-			case 9:break;
-			case 0:break;
+			case 8: ui_save(&list, &dirty);         break;
+			case 9: ui_load(&list, &dirty);         break;
+			case 0:
+				if (dirty) {
+					char buf[INPUT_BUF_LEN];
+					char* line = read_line("存在未保存的修改，退出前是否保存？(y/n)：", buf, sizeof(buf));
+					if (line != NULL && (line[0] == 'y' || line[0] == 'Y')) {
+						ui_save(&list, &dirty);
+					}
+				}
+				list_free(&list);
+				printf("再见！\n");
+				return;
 		}
 		press_enter_to_continue();
 	}
-
-
 
 	//测试6（交互式增删查改与排序显示）
 	/*StudentList list;

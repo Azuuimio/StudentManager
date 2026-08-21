@@ -1,4 +1,4 @@
-﻿//student.h —— 学生数据模型与动态数组容器（接口声明）
+﻿//student.h —— 学生数据模型与动态数组容器
 
 //头文件保护
 #ifndef STUDENT_H
@@ -32,14 +32,19 @@ void list_init(StudentList* list);
 //释放容器内存
 void list_free(StudentList* list);	
 /*------------------------------*/
-//添加学生（返回0代表成功，-1代表学号已存在，-2代表内存不足）
+//函数：添加学生 
+//返回值：返回0代表成功，-1代表学号已存在，-2代表内存不足
 int list_add (StudentList* list, const Student* stu);	
-//删除学生（返回0代表未找到指定学号的学生，1代表删除成功）
+//函数：删除学生
+//返回值：返回0代表未找到指定学号的学生，1代表删除成功
 int list_remove_by_id(StudentList* list, const char* id);
-//根据学号查找 (找到返回记录地址，找不到返回“NULL”)
+//函数：根据学号查找
+//返回值：找到返回记录地址，找不到返回“NULL”
+//注意：返回的指针在下一次增删导致realloc后可能失效，不可长期保存
 Student* list_find_by_id(const StudentList* list, const char* id);
 /*------------------------------*/
-//按成绩排序（参数descending为1表示降序，为0表示升序）
+//函数：按成绩排序
+//参数descending为1表示降序，为0表示升序
 void list_sort_by_score(StudentList* list, int descending);
 //按学号升序排序
 void list_sort_by_id(StudentList* list);
