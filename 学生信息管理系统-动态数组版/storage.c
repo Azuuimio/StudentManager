@@ -1,32 +1,32 @@
-//storage.c ¡ª¡ª ÎÄ¼ş¶ÁĞ´
+ï»¿//storage.c â€”â€” æ–‡ä»¶è¯»å†™
 
-//ÒıÈë×Ô¶¨ÒåÍ·ÎÄ¼ş
+//å¼•å…¥è‡ªå®šä¹‰å¤´æ–‡ä»¶
 #include "storage.h"
 
-//ÒıÈë±ê×¼¿âÍ·ÎÄ¼ş
+//å¼•å…¥æ ‡å‡†åº“å¤´æ–‡ä»¶
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
-//¶¨Òåºê£¨uºó×º±íÊ¾unsigned£©
-#define FILE_MAGIC     "STU1"		//Ä§Êı
-#define FILE_VERSION   1u			//ÎÄ¼ş¸ñÊ½°æ±¾ºÅ
-#define MAX_RECORDS    1000000u		//¼ÇÂ¼ÊıÉÏÏŞ
+//å®šä¹‰å®ï¼ˆuåç¼€è¡¨ç¤ºunsignedï¼‰
+#define FILE_MAGIC     "STU1"		//é­”æ•°
+#define FILE_VERSION   1u			//æ–‡ä»¶æ ¼å¼ç‰ˆæœ¬å·
+#define MAX_RECORDS    1000000u		//è®°å½•æ•°ä¸Šé™
 
-//¶¨ÒåÎÄ¼şÍ·½á¹¹Ìå
+//å®šä¹‰æ–‡ä»¶å¤´ç»“æ„ä½“
 typedef struct {
-	char magic[4];		//Ä§Êı
-	uint32_t version;	//ÎÄ¼ş¸ñÊ½°æ±¾ºÅ
-	uint32_t count;		//¼ÇÂ¼Êı
+	char magic[4];		//é­”æ•°
+	uint32_t version;	//æ–‡ä»¶æ ¼å¼ç‰ˆæœ¬å·
+	uint32_t count;		//è®°å½•æ•°
 }FileHeader;
 
-//º¯ÊıÉùÃ÷
+//å‡½æ•°å£°æ˜
 int storage_save(const char* filename, const StudentList* list);
 int storage_load(const char* filename, StudentList* list);
 
-//º¯Êı£º½«ÈİÆ÷ÖĞµÄÈ«²¿¼ÇÂ¼±£´æµ½ÎÄ¼ş
-//·µ»ØÖµ£º0´ú±í³É¹¦£¬-1´ú±í²ÎÊı·Ç·¨£¬-2´ú±íÎÄ¼şÎŞ·¨´ò¿ª»òĞ´Èë
+//å‡½æ•°ï¼šå°†å®¹å™¨ä¸­çš„å…¨éƒ¨è®°å½•ä¿å­˜åˆ°æ–‡ä»¶
+//è¿”å›å€¼ï¼š0ä»£è¡¨æˆåŠŸï¼Œ-1ä»£è¡¨å‚æ•°éæ³•ï¼Œ-2ä»£è¡¨æ–‡ä»¶æ— æ³•æ‰“å¼€æˆ–å†™å…¥
 int storage_save(const char* filename, const StudentList* list) {
 	FILE* fp;
 	FileHeader header;
@@ -40,11 +40,11 @@ int storage_save(const char* filename, const StudentList* list) {
 	memcpy(header.magic, FILE_MAGIC, 4);
 	header.version = FILE_VERSION;
 	header.count = (uint32_t)list->size;
-	//Ğ´ÈëÎÄ¼şÍ·
+	//å†™å…¥æ–‡ä»¶å¤´
 	if (fwrite(&header, sizeof(header), 1, fp) != 1) {
 		return -2;
 	}
-	//Ğ´ÈëÑ§ÉúÊı¾İ
+	//å†™å…¥å­¦ç”Ÿæ•°æ®
 	if (list->size > 0) {
 		size_t written = fwrite(list->data, sizeof(Student), list->size, fp);
 		if (written != list->size) {
@@ -58,8 +58,8 @@ int storage_save(const char* filename, const StudentList* list) {
 	return 0;
 }
 
-//º¯Êı£º´ÓÎÄ¼ş¼ÓÔØ¼ÇÂ¼²¢Ìæ»»ÈİÆ÷ÏÖÓĞÄÚÈİ¡£
-//·µ»ØÖµ£º0´ú±í³É¹¦£¬-1´ú±í²ÎÊı·Ç·¨£¬-2´ú±íÎÄ¼şÎŞ·¨¶ÁÈ¡£¬-3´ú±íÎÄ¼ş¸ñÊ½²»·û
+//å‡½æ•°ï¼šä»æ–‡ä»¶åŠ è½½è®°å½•å¹¶æ›¿æ¢å®¹å™¨ç°æœ‰å†…å®¹ã€‚
+//è¿”å›å€¼ï¼š0ä»£è¡¨æˆåŠŸï¼Œ-1ä»£è¡¨å‚æ•°éæ³•ï¼Œ-2ä»£è¡¨æ–‡ä»¶æ— æ³•è¯»å–ï¼Œ-3ä»£è¡¨æ–‡ä»¶æ ¼å¼ä¸ç¬¦
 int storage_load(const char* filename, StudentList* list) {
 	FILE* fp;
 	FileHeader header;
@@ -71,16 +71,16 @@ int storage_load(const char* filename, StudentList* list) {
 	if (fp == NULL) {
 		return -2;
 	}
-	//¼ìÑéÎÄ¼şÍ·
-	if (fread(&header, sizeof(header), 1, fp) != 1 ||	//¶ÁÈ¡ÎÄ¼şÍ·
-		memcmp(header.magic, FILE_MAGIC, 4) != 0 ||		//¼ìÑéÄ§Êı
-		header.version != FILE_VERSION ||				//¼ìÑéÎÄ¼ş¸ñÊ½°æ±¾ºÅ
-		header.count > MAX_RECORDS) {					//¼ìÑé¼ÇÂ¼Êı²»³¬ÏŞ
+	//æ£€éªŒæ–‡ä»¶å¤´
+	if (fread(&header, sizeof(header), 1, fp) != 1 ||	//è¯»å–æ–‡ä»¶å¤´
+		memcmp(header.magic, FILE_MAGIC, 4) != 0 ||		//æ£€éªŒé­”æ•°
+		header.version != FILE_VERSION ||				//æ£€éªŒæ–‡ä»¶æ ¼å¼ç‰ˆæœ¬å·
+		header.count > MAX_RECORDS) {					//æ£€éªŒè®°å½•æ•°ä¸è¶…é™
 		fclose(fp);
-		return 3;
+		return -3;
 	}
-	//¶ÁÈ¡Ñ§ÉúÊı¾İ£ºÏÈÓÃÁÙÊ±ÈİÆ÷½ÓÊÕÊı¾İ£¬È·ÈÏÎŞÎóºó½«ÁÙÊ±ÈİÆ÷ÕûÌå¸³Öµ¸øÄ¿±êÈİ
-	//Æ÷£¬ÕâÑù×ö¿ÉÒÔ±£Ö¤¼ÓÔØÊ§°ÜÊ±Ô­Êı¾İÍêºÃÎŞËğ
+	//è¯»å–å­¦ç”Ÿæ•°æ®ï¼šå…ˆç”¨ä¸´æ—¶å®¹å™¨æ¥æ”¶æ•°æ®ï¼Œç¡®è®¤æ— è¯¯åå°†ä¸´æ—¶å®¹å™¨æ•´ä½“èµ‹å€¼ç»™ç›®æ ‡å®¹
+	//å™¨ï¼Œè¿™æ ·åšå¯ä»¥ä¿è¯åŠ è½½å¤±è´¥æ—¶åŸæ•°æ®å®Œå¥½æ— æŸ
 	list_init(&tmp);
 	if (header.count > 0) {
 		tmp.data = (Student*)malloc((size_t)header.count * sizeof(Student));

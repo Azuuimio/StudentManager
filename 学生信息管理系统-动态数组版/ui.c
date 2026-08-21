@@ -20,17 +20,17 @@
 //函数声明
 static char* trim(char* s);
 static char* read_line(const char* prompt, char* buf, size_t size);
-static read_int(const char* prompt, int min, int max, int* out);
+static int read_int(const char* prompt, int min, int max, int* out);
 static int read_double(const char* prompt, double min, double max, double* out);
 static void copy_str(char* dst, size_t dst_size, const char* src);
 static void clear_screen(void);
-static void ui_add(Student* list, int* dirty);
+static void ui_add(StudentList* list, int* dirty);
 static void ui_remove(StudentList* list, int* dirty);
 static void ui_modify(StudentList* list, int* dirty);
 static void ui_find_by_id(StudentList* list);
 static void ui_find_by_name(StudentList* list);
 static void ui_sort_show(StudentList* list);
-static void ui_save(StudentList* list, int dirty);
+static void ui_save(StudentList* list, int* dirty);
 static void ui_load(StudentList* list, int* dirty);
 static void press_enter_to_continue(void);
 static void print_menu(void);
@@ -286,7 +286,7 @@ static void ui_modify(StudentList* list, int* dirty) {
 			if (!read_int("新年龄：", 1, 150, &stu->age)) return;
 			break;
 		case 3:
-			if (!read_int("新成绩：", 0.0, 100.0, &stu->score)) return;
+			if (!read_double("新成绩：", 0.0, 100.0, &stu->score)) return;
 			break;
 	}
 	printf("修改成功。\n");
@@ -422,12 +422,21 @@ void ui_run(void) {
 	StudentList list;
 	int dirty = 0;
 	int choice;
+	int loaded;
 	list_init(&list);
+	//启动时尝试自动加载上次的数据（文件不存在不算错误）
+	loaded = (storage_load(DATA_FILE, &list) == 0);
 	//主循环
 	for (;;) {
 		clear_screen();
 		print_menu();
+		if (loaded) {          /* 自动加载结果只在首帧提示一次 */
+			printf("已自动加载 %s（%llu 条记录）\n",
+				DATA_FILE, (unsigned long long)list.size);
+			loaded = 0;
+		}
 		if (!read_int("请选择功能：", 0, 9, &choice)) {
+			list_free(&list);
 			break;
 		}
 		switch (choice) {

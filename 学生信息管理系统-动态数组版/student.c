@@ -24,8 +24,8 @@ static int list_grow(StudentList* list);
 Student* list_find_by_id(const StudentList* list, const char* id);
 int list_add(StudentList* list, const Student* stu);
 int list_remove_by_id(StudentList* list, const char* id);
-static int compare_socre_desc(const void* a, const void* b);
-static int compare_socre_asc(const void* a, const void* b);
+static int compare_score_desc(const void* a, const void* b);
+static int compare_score_asc(const void* a, const void* b);
 void list_sort_by_score(StudentList* list, int descending);
 static int compare_id_asc(const void* a, const void* b);
 void list_sort_by_id(StudentList* list);
@@ -134,7 +134,7 @@ int list_remove_by_id(StudentList* list, const char* id) {
 }
 
 //函数：按成绩降序排序的比较函数（传入qsort）
-static int compare_socre_desc(const void* a, const void* b) {
+static int compare_score_desc(const void* a, const void* b) {
 	//void可以指向任何类型，但正因为它不知道指向什么类型，所以不能解引用、不能访
 	//问成员、不能做指针算术,所以要做强制类型转换
 	const Student* sa = (const Student*)a;
@@ -153,8 +153,8 @@ static int compare_socre_desc(const void* a, const void* b) {
 */
 
 //函数：按成绩升序排序的比较函数（传入qsort）
-static int compare_socre_asc(const void* a, const void* b) {
-	return compare_socre_desc(b, a);	//升序排序就是降序排序的相反
+static int compare_score_asc(const void* a, const void* b) {
+	return compare_score_desc(b, a);	//升序排序就是降序排序的相反
 }
 
 //函数：按成绩排序
@@ -164,9 +164,9 @@ void list_sort_by_score(StudentList* list, int descending) {
 		return;	//参数错误或无需排序
 	}
 	if (descending) {
-		qsort(list->data, list->size, sizeof(Student), compare_socre_desc);
+		qsort(list->data, list->size, sizeof(Student), compare_score_desc);
 	} else {
-		qsort(list->data, list->size, sizeof(Student), compare_socre_asc);
+		qsort(list->data, list->size, sizeof(Student), compare_score_asc);
 	}
 }
 
@@ -267,7 +267,7 @@ void list_print(const StudentList* list) {
 	}
 	student_print_separator();
 	student_print_header();
-	for (int i = 0; i < list->size; i++) {
+	for (size_t i = 0; i < list->size; i++) {
 		student_print(&list->data[i]);
 	}
 	student_print_separator();
