@@ -27,9 +27,9 @@ typedef struct {
 }StudentList;
 
 /*--------以下为函数声明--------*/
-//初始化容器
+//函数：初始化容器
 void list_init(StudentList* list);
-//释放容器内存
+//函数：释放容器内存
 void list_free(StudentList* list);	
 /*------------------------------*/
 //函数：添加学生 
