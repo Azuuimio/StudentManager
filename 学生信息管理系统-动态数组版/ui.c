@@ -357,7 +357,7 @@ static void ui_find_by_name(StudentList* list) {
 //函数：排序显示
 static void ui_sort_show(StudentList* list) {
 	int choice;
-	printf("—— 按成绩排序显示 ——\n");
+	printf("—— 排序显示 ——\n");
 	printf("排序方式：\n");
 	printf("1.成绩从高到低\n");
 	printf("2.成绩从低到高\n");
