@@ -4,7 +4,7 @@
 
 ## 运行示例
 
-<img width="1738" height="933" alt="屏幕截图" src="https://github.com/user-attachments/assets/1cdedb45-1ea5-49e3-8a80-64eaae20b524" />
+<img width="865" height="465" alt="屏幕截图 2026-08-24 085835" src="https://github.com/user-attachments/assets/c0dd4404-451a-4581-981d-c78b7582ef46" />
 
 ## **Visual Studio**常见问题（重要）
 
