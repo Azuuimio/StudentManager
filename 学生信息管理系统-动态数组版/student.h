@@ -40,7 +40,7 @@ int list_add (StudentList* list, const Student* stu);
 //返回值：返回0代表删除成功， -1代表未找到指定学号的学生，1代表参数错误
 int list_remove_by_id(StudentList* list, const char* id);
 //函数：根据学号查找
-//返回值：找到返回记录地址，找不到返回“NULL”
+//返回值：找到返回记录地址，找不到返回NULL
 //注意：返回的指针在下一次增删或排序后可能失效，不可长期保存
 Student* list_find_by_id(const StudentList* list, const char* id);
 /*------------------------------*/
