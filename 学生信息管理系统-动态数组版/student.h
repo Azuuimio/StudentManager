@@ -44,18 +44,18 @@ int list_remove_by_id(StudentList* list, const char* id);
 Student* list_find_by_id(const StudentList* list, const char* id);
 /*------------------------------*/
 //函数：按成绩排序
-//参数descending为1表示降序，为0表示升序
+//参数：descending为1表示降序，为0表示升序
 void list_sort_by_score(StudentList* list, int descending);
-//按学号升序排序
+//函数：按学号升序排序
 void list_sort_by_id(StudentList* list);
 /*------------------------------*/
-//打印学生列表表头
+//函数：打印学生列表表头
 void student_print_header(void);
-//打印学生列表分割线
+//函数：打印学生列表分割线
 void student_print_separator(void);
-//打印单个学生信息
+//函数：打印单个学生信息
 void student_print(const Student* stu);
-//打印学生列表
+//函数：打印学生列表
 void list_print(const StudentList* list);
 /*------------------------------*/
 

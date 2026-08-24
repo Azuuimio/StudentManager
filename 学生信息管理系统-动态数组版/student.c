@@ -147,7 +147,7 @@ static int compare_score_asc(const void* a, const void* b) {
 }
 
 //函数：按成绩排序
-//参数descending为1表示降序，为0表示升序
+//参数：descending为1表示降序，为0表示升序
 void list_sort_by_score(StudentList* list, int descending) {
 	if (list == NULL || list->size < 2) {
 		return;	//参数错误或无需排序
