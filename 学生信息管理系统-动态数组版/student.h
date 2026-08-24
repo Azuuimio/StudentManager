@@ -26,7 +26,8 @@ typedef struct {
 	size_t   capacity;	//最大学生数量
 }StudentList;
 
-/*--------以下为函数声明--------*/
+//以下为函数声明
+/*------------------------------*/
 //函数：初始化容器
 void list_init(StudentList* list);
 //函数：释放容器内存
