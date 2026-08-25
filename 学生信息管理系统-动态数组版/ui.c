@@ -334,7 +334,7 @@ static void ui_find_by_name(StudentList* list) {
 		return;
 	}
 	size_t count = 0;
-	const Student** results = student_list_find_by_name(list, line, &count);
+	Student** results = student_list_find_by_name(list, line, &count);
 	if (results == NULL) {
 		printf("查询失败。\n");
 		return;
