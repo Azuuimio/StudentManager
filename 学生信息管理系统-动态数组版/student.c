@@ -84,7 +84,7 @@ Student* list_find_by_id(const StudentList* list, const char* id) {
 }
 
 //函数：根据姓名查找（模糊匹配）
-//返回值：找到返回指针数组，参数为空或内存不足时返回 NULL，*out_count 为匹配数量。
+//返回值：找到返回指针数组，参数为空或内存不足时返回NULL，*out_count为匹配数量
 //注意：调用方负责free
 Student** student_list_find_by_name(const StudentList* list,const char* name,size_t* out_count) {
 	if (list == NULL || name == NULL || name[0] == '\0' || out_count == NULL) {
