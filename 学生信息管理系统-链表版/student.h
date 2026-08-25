@@ -68,6 +68,7 @@ void student_print_separator(void);
 //函数：打印单个学生信息
 void student_print(const Student* stu);
 //函数：打印学生列表
+void list_print(const StudentList* list);
 /*------------------------------*/
 
 #endif

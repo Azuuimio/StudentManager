@@ -9,13 +9,10 @@
 #include <string.h>
 
 //定义宏
-#define INITIAL_CAPACITY 8	//初始容量
-/*-----------------------------------*/
 #define COL_ID 12			//学号列宽
 #define COL_NAME 12			//姓名列宽
 #define COL_AGE 12			//年龄列宽
 #define SEPARATOR_WIDTH 41	//分隔线宽
-/*-----------------------------------*/
 
 //函数声明
 static int compare_score_desc(const void* a, const void* b);
@@ -72,7 +69,7 @@ Student* list_find_by_id(const StudentList* list, const char* id) {
 //返回值：找到返回指针数组，参数为空或内存不足时返回 NULL，*out_count 为匹配数量。
 //注意：调用方负责free
 Student** student_list_find_by_name(const StudentList* list, const char* name, size_t* out_count) {
-	if (list == NULL || name == NULL || name[0] == '\0') {
+	if (list == NULL || name == NULL || name[0] == '\0' || out_count == NULL) {
 		return NULL;	//参数错误
 	}
 	*out_count = 0;
@@ -134,7 +131,7 @@ int list_remove_by_id(StudentList* list, const char* id) {
 			} else {
 				prev->next = cur->next;
 			}
-			if (cur == list -> tail) {
+			if (cur == list->tail) {
 				list->tail = prev;
 			}
 			free(cur);
@@ -177,7 +174,8 @@ void list_sort_by_score(StudentList* list, int descending) {
 		return;	//参数错误或无需排序
 	}
 	//使用临时数组进行排序
-	Student* tmp = malloc(list->size * sizeof(Student));;
+	Student* tmp = malloc(list->size * sizeof(Student));
+	if (tmp == NULL) return;
 	StudentNode* cur;
 	size_t i;
 	for (cur = list->head, i = 0; cur != NULL; cur = cur->next, i++) {
@@ -209,7 +207,8 @@ void list_sort_by_id(StudentList* list) {
 		return;	//参数错误或无需排序
 	}
 	//使用临时数组进行排序
-	Student* tmp = malloc(list->size * sizeof(Student));;
+	Student* tmp = malloc(list->size * sizeof(Student));
+	if (tmp == NULL) return;
 	StudentNode* cur;
 	size_t i;
 	for (cur = list->head, i = 0; cur != NULL; cur = cur->next, i++) {
