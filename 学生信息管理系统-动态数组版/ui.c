@@ -326,8 +326,6 @@ static void ui_find_by_id(StudentList* list){
 static void ui_find_by_name(StudentList* list) {
 	char buf[INPUT_BUF_LEN];
 	char* line;
-	int found = 0;
-	unsigned long long num = 0;
 	printf("—— 按姓名查询 ——\n");
 	line = read_line("请输入姓名(支持模糊匹配)：", buf, sizeof(buf));
 	if (line == NULL) return;
@@ -335,23 +333,24 @@ static void ui_find_by_name(StudentList* list) {
 		printf("姓名不能为空。\n");
 		return;
 	}
-	for (size_t i = 0; i < list->size; i++) {
-		if (strstr(list->data[i].name, line) != NULL) {
-			if (found != 1) {
-				student_print_separator();
-				student_print_header();
-			}
-			student_print(&list->data[i]);
-			num++;
-			found = 1;
-		}
+	size_t count = 0;
+	const Student** results = student_list_find_by_name(list, line, &count);
+	if (results == NULL) {
+		printf("查询失败。\n");
+		return;
 	}
-	if (found == 1) {
+	if (count > 0) {
 		student_print_separator();
-		printf("共 %llu 位匹配的学生。\n", num);
-	} else {
+		student_print_header();
+		for (size_t i = 0; i < count; i++)
+			student_print(results[i]);
+		student_print_separator();
+		printf("共 %zu 位匹配的学生。\n", count);
+	}
+	else {
 		printf("未找到匹配的学生。\n");
 	}
+	free(results);
 }
 
 //函数：排序显示

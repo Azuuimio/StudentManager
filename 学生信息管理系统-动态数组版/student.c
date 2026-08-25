@@ -83,6 +83,30 @@ Student* list_find_by_id(const StudentList* list, const char* id) {
 	return NULL;	//找不到			
 }
 
+//函数：根据姓名查找（模糊匹配）
+//返回值：找到返回指针数组，参数为空或内存不足时返回 NULL，*out_count 为匹配数量。
+//注意：调用方负责free
+Student** student_list_find_by_name(const StudentList* list,const char* name,size_t* out_count) {
+	if (list == NULL || name == NULL || name[0] == '\0') {
+		return NULL;
+	}
+	*out_count = 0;
+	size_t cap = (list->size > 0) ? list->size : 1;		 //避免malloc(0)
+	Student** results = malloc(cap * sizeof(*results));
+	if (results == NULL) {
+		return NULL;
+	}
+	size_t count = 0;
+	for (size_t i = 0; i < list->size; i++) {
+		if (strstr(list->data[i].name, name) != NULL) {
+			results[count] = &list->data[i];
+			count++;
+		}
+	}
+	*out_count = count;
+	return results;
+}
+
 //函数：添加学生 
 //返回值：返回0代表成功，-1代表学号已存在，-2代表内存不足，1代表参数错误
 int list_add(StudentList* list, const Student* stu) {
