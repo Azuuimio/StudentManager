@@ -52,3 +52,5 @@
 | 操作系统 | Windows 11 |
 | IDE | Visual Studio Community 2022 |
 | 编译器 | MSVC v143 工具集 |
+
+注意：由于该项目直接调用了 Win32 API，所以只能在 Windows 平台上编译和运行
